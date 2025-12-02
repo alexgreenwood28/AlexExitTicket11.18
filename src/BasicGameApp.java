@@ -3,22 +3,33 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+
+
 //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 public class BasicGameApp implements Runnable {
 
-    //Sets the width and height of the program window
-    final int WIDTH = 1000;
-    final int HEIGHT = 700;
+    int xpos;
+    int ypos;
+    int speed;
+    double dx;
+    double dy;
+    int width;
+    int height;
+    Rectangle hitbox;
 
+    //Sets the width and height of the program window
+    final int WIDTH = 1100;
+    final int HEIGHT = 1000;
 
     //Variable Definition Section
     //You can set their initial values too
     // Like Mario mario = new Mario(); //
-    Mario mario;
+    Car red;
     Image background;
-    boolean jumping = false;
-    int jumpHeight = 100;
-    int groundLevel = 350;
+    Car blue;
+  //  boolean jumping = false;
+  //  int jumpHeight = 100;
+  //  int groundLevel = 350;
 
     // Initialize your variables and construct your program objects here.
     public BasicGameApp() { // BasicGameApp constructor
@@ -26,18 +37,42 @@ public class BasicGameApp implements Runnable {
 
         //variable and objects
         //create (construct) the objects needed for the game
-        mario=new Mario(500,0,1.5,1.5,80,100);
-        mario.name="Alex mario";
-        mario.image=Toolkit.getDefaultToolkit().getImage("Mario.png");
 
-        background=Toolkit.getDefaultToolkit().getImage("bg.jpg");
+        background=Toolkit.getDefaultToolkit().getImage("parkinglot.png");
+        red=new Car(500,0,1.5,1.5,90,100);
+        red.name="Alex car";
+        red.aliveimage=Toolkit.getDefaultToolkit().getImage("car.png");
+        red.deadImage=Toolkit.getDefaultToolkit().getImage("crash.jpg");
+
+        blue=new Car(600,2,3,1.5,100,100);
+        blue.name="Hazel car";
+        blue.aliveimage=Toolkit.getDefaultToolkit().getImage("images.png");
+
+
     }
     // end BasicGameApp constructor
 
     public void moveThings() {
-        mario.move();
+        red.move();
+        blue.move();
         //call the move() code for each object  -
 
+    }
+    public void checkCollisions(){
+        System.out.println(red.hitbox);
+        System.out.println(blue.hitbox);
+        if(red.hitbox.intersects(blue.hitbox)){
+            red.isAlive=false;
+            System.out.println("Crash");
+            red.dx=-red.dx;
+            red.dy=-red.dy;
+            blue.dx=-blue.dx;
+            blue.dy=-blue.dy;
+            hitbox = new Rectangle(xpos, ypos, width, height);
+        }
+        else{
+            red.isAlive=true;
+        }
     }
 
     //Paints things on the screen using bufferStrategy
@@ -47,8 +82,17 @@ public class BasicGameApp implements Runnable {
 
         //draw the images
         // Signature: drawImage(Image img, int x, int y, int width, int height, ImageObserver observer)
-        g.drawImage(mario.image,mario.xpos,mario.ypos,mario.width,mario.height,null);
         g.drawImage(background,0,0,WIDTH,HEIGHT,null);
+        if (red.isAlive){
+            g.drawImage(red.aliveimage,red.xpos,red.ypos,red.width,red.height,null);
+        }
+        else{
+            g.drawImage(red.deadImage,red.xpos,red.ypos,red.width,red.height,null);
+
+            //g.drawImage(red.aliveimage,red.xpos,red.ypos,red.width,red.height,null);
+
+        }
+        g.drawImage(blue.aliveimage, blue.xpos, blue.ypos, blue.width, blue.height, null);
 
 
         // Keep the code below at the end of render()
@@ -78,6 +122,7 @@ public class BasicGameApp implements Runnable {
         //for the moment we will loop things forever.
         while (true) {
             moveThings();  //move all the game objects
+            checkCollisions();
             render();  // paint the graphics
             pause(10); // sleep for 10 ms
         }
